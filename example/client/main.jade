@@ -7,12 +7,31 @@ head
   meta(name='apple-mobile-web-app-capable', content='yes')
   meta(name='mobile-web-app-capable', content='yes')
 body
-  +famousContext id="mainCtx"
-    +flexGridExample
+  
+template(name='famousInit')
+  +shootIt
 
-template(name='flexGridExample')
-  +Scrollview id='scrollview'
-    +FlexGrid id='flexgrid'
-      +famousEach items
-        +Surface class='surf' properties=prop
-          p= name
+template(name='shootIt')
+  //+FlexGrid id='container' marginTop=50 marginSide=50 gutterCol=40 gutterRow=20 itemSize="[150,100]" transition=transition
+    +famousEach items
+      +Surface class='red-bg'
+        p= name
+  //+GridLayout id='container' size='[undefined,undefined]' dimensions='[3,1]'
+    +famousEach items
+      +Surface class='red-bg'
+        p= name
+  //+MyGridLayout id='container' size='[undefined,undefined]' dimensions='[3,1]'
+    +famousEach items
+      +Surface class='red-bg'
+        p= name
+  +FlexGrid id='container' marginTop=50 marginSide=50 gutterCol=40 gutterRow=20 itemSize="[150,100]" transition=transition
+    +famousEach items
+      +Surface class='red-bg'
+        p= name
+  //+FlexGrid id='container' marginTop=50 marginSide=50 gutterCol=40 gutterRow=20 itemSize="[150,100]" transition=transition
+    +Surface class='red-bg'
+      p a
+    +Surface class='blue-bg'
+      p b
+    +Surface class='green-bg'
+      p c

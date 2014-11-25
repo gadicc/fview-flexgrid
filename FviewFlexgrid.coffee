@@ -1,13 +1,3 @@
-@View = null
-@ViewSequence = null
-@Entity = null
-@Modifier = null
-@Transform = null
-@Transitionable = null
-@TransitionableTransform = null
-@Easing = null
-@Timer = null
-
 FView.ready ->
   View = famous.core.View
   ViewSequence = famous.core.ViewSequence
@@ -17,20 +7,20 @@ FView.ready ->
   Transitionable = famous.transitions.Transitionable
   TransitionableTransform = famous.transitions.TransitionableTransform
   Easing = famous.transitions.Easing
-  Timer = famous.utilities.Timer
 
   class FlexGrid extends View
-    @DEFAULT_OPTIONS:
-      marginTop: 10
-      marginSide: 0
-      gutterCol: 10
-      gutterRow: 10
-      itemSize: [300, 150]
+    DEFAULT_OPTIONS:
+      marginTop: undefined
+      marginSide: undefined
+      gutterCol: undefined
+      gutterRow: undefined
+      itemSize: undefined
       transition:
-        duration: 300
+        duration: 500
         curve: Easing.outBack
 
     constructor: (@options)->
+      @constructor.DEFAULT_OPTIONS = @DEFAULT_OPTIONS
       super @options
       @_modifiers = []
       @_states = []
@@ -55,23 +45,22 @@ FView.ready ->
       col = row = 0
       for item in @_items
         xPos = spacing.marginSide + col * spacing.ySpacing
-        yPos = @options.marginTop + row * \
-          (@options.itemSize[1] + @options.gutterRow)
+        yPos = @options.marginTop + row * (@options.itemSize[1] + @options.gutterRow)
         positions.push [xPos, yPos, 0]
         col++
         if col is spacing.numCols
-          row++
+          row++;
           col = 0
+      console.log yPos, @options.itemSize[1], @options.marginTop
       @_height = yPos + @options.itemSize[1] + @options.marginTop
       positions
 
     _createModifier: (index, position, size) ->
       transitionItem = {
-        transform: (new TransitionableTransform(Transform.translate.apply(null,\
-          position)))
+        transform: (new TransitionableTransform(Transform.translate.apply(null, position)))
       , size: (new Transitionable(size or @options.itemSize))
       }
-
+                   
       modifier = new Modifier transitionItem
       @_states[index] = transitionItem
       @_modifiers[index] = modifier
@@ -84,18 +73,22 @@ FView.ready ->
       transformTransitionable.setTranslate position, @options.transition
       sizeTransitionable.set size, @options.transition
 
-    sequenceFrom: (items) -> @_items = items
+    sequenceFrom: (items) ->
+      console.log 'sequenceFrom'
+      @_items = items
+      window.x = @_items
 
     render: -> @id
 
     getSize: ->
-      return unless @_height
+      unless this._height
+        return
       [@_cachedWidth, @_height]
 
     commit: (context) ->
       width = context.size[0]
       specs = []
-      unless @_cachedWidth is width
+      unless @_cachedWidth is width and @_cachedLength is @_items.length
         spacing = @_calcSpacing width
         size = @options.itemSize
         if spacing.numCols < 2
@@ -109,18 +102,10 @@ FView.ready ->
           else
             @_animateModifier i, positions[i], size
         @_cachedWidth = width
+        @_cachedLength = @_items.length
       for i in [0...this._modifiers.length]
         spec = @_modifiers[i].modify target: @_items[i].render()
         specs.push spec
       specs
 
-  FView.registerView 'FlexGrid', FlexGrid,
-    # TODO Hideous: Dirtify context. Hack owing to:
-    # https://github.com/gadicc/meteor-famous-views/issues/157#issuecomment-64124675
-    famousCreatedPost: ->
-      node = @parent
-      node = node.parent until node.id? and node.id is 'mainCtx'
-      [width, height] = node.context._size
-      famous.utilities.Timer.setTimeout ->
-        node.context.setSize [width+1, height+1]
-      , 500
+  FView.registerView 'FlexGrid', FlexGrid
